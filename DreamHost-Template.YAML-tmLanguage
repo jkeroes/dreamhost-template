@@ -1,0 +1,102 @@
+# [PackageDev] target_format: plist, ext: tmLanguage
+---
+name: DreamHost Template
+scopeName: text.html.dh-template
+fileTypes: [tp]
+uuid: 71b8d29d-07b2-4fc3-970c-d3ab59286976
+
+patterns:
+- comment: '-{-{ Yadda.index'
+  include: '#section'
+
+- comment: '--var-- and --var|filter--'
+  include: '#variable'
+
+- comment: '==include== and [[include]]'
+  include: '#include'
+
+- comment: '-[-[ filters=1, this, that ]-]-'
+  include: '#filters'
+
+- comment: '{{...}}'
+  begin: '\{\{(?!/)'
+  end: '\}\}'
+  patterns:
+  - include: '#variable'
+  - include: '#logic'
+
+- comment: '{{/...}}'
+  begin: '\{\{\/'
+  end: '\}\}'
+  patterns:
+  - include: '#variable'
+  - include: '#logic'
+
+- comment: 'everything else is HTML'
+  patterns:
+  - include: 'text.html.basic'
+
+repository:
+  variable:
+    patterns:
+    - include: '#variable-filtered'
+    - include: '#variable-subtitution'
+
+  variable-filtered:
+    match: '(?x) (--) ([^\|-]+) \| ([^-]+) (--)'
+    captures:
+      '1': {name: punctuation.definition.variable.perl.dh-template}
+      '2': {name: variable.other.predefined.perl}
+      '3': {name: support.function.perl.dh-template}
+      '4': {name: punctuation.definition.variable.perl.dh-template}
+
+  variable-subtitution:
+    match: '(?x) (--) ([^-]+) (--)'
+    captures:
+      '1': {name: punctuation.definition.variable.perl.dh-template}
+      '2': {name: variable.other.predefined.perl.dh-template}
+      '3': {name: punctuation.definition.variable.perl.dh-template}
+
+  section:
+    match: '(?x) ^ -{-{ \s* (\S+) \( ?(.*) \)? \s* $'
+    captures:
+      '1': {name: entity.name.class.section.dh-template}
+      '2': {name: entity.name.tag.filter.dh-template}
+
+  include:
+    patterns:
+      - include: '#include-bracketed'
+      - include: '#include-equals'
+
+  include-equals:
+    match: '(?x) (==) ([^=]+) (==)'
+    captures:
+      '1': {name: punctuation.definition.tag.dh-template}
+      '2': {name: storage.type.interpolated.dh-template}
+      '3': {name: punctuation.definition.tag.dh-template}
+
+  include-bracketed:
+    match: '(?x) (\[\[) ([^\]]+) (\]\])'
+    captures:
+      '1': {name: punctuation.definition.tag.dh-template}
+      '2': {name: storage.type.interpolated.dh-template}
+      '3': {name: punctuation.definition.tag.dh-template}
+
+  logic:
+    match: '(?x) (\band\b | \bor\b | >= | <= | > | < | == | = | != | !)'
+    captures:
+      '1': {name: keyword.operator.comparison.perl}
+
+  filters:
+    begin: '^-\[-\['
+    end: '\]-\]-\s*$'
+    patterns:
+    - include: '#list'
+
+  list:
+    match: '(?x) ([^,]+?) (=?) ([^,]*?) ,?'
+    captures:
+      '1': {name: support.function.perl.dh-template}
+      '2': {name: punctuation.separator.key-value}
+      '3': {name: support.function.perl.dh-template}
+...
